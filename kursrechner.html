@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Kursrechner: CZK in CHF</title>
+    <style>
+        :root {
+            --bg-color: #f4f6f9;
+            --card-bg: #ffffff;
+            --primary: #007aff;
+            --text-main: #1c1c1e;
+            --text-muted: #8e8e93;
+            --border: #e5e5ea;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-color: #121214;
+                --card-bg: #1c1c1e;
+                --primary: #0a84ff;
+                --text-main: #ffffff;
+                --text-muted: #aeaeac;
+                --border: #2c2c2e;
+            }
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 16px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 400px;
+            background: var(--card-bg);
+            border-radius: 24px;
+            padding: 24px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
+        }
+
+        h1 {
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .input-group {
+            position: relative;
+            margin-bottom: 16px;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        input {
+            width: 100%;
+            padding: 16px 60px 16px 16px;
+            font-size: 1.25rem;
+            font-weight: 600;
+            border: 2px solid var(--border);
+            border-radius: 14px;
+            background: transparent;
+            color: var(--text-main);
+            outline: none;
+            transition: border-color 0.2s;
+            -moz-appearance: textfield;
+        }
+
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        input:focus {
+            border-color: var(--primary);
+        }
+
+        .currency-badge {
+            position: absolute;
+            right: 16px;
+            font-weight: 700;
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            pointer-events: none;
+        }
+
+        .swap-container {
+            display: flex;
+            justify-content: center;
+            margin: 8px 0;
+        }
+
+        .swap-btn {
+            background: var(--border);
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s, background-color 0.2s;
+        }
+
+        .swap-btn:active {
+            transform: scale(0.9);
+            background-color: var(--primary);
+        }
+
+        .swap-btn:active svg {
+            stroke: #ffffff;
+        }
+
+        .swap-btn svg {
+            width: 20px;
+            height: 20px;
+            stroke: var(--text-main);
+            fill: none;
+            stroke-width: 2;
+        }
+
+        .info-box {
+            margin-top: 20px;
+            padding: 12px;
+            background: rgba(0, 122, 255, 0.05);
+            border-radius: 12px;
+            text-align: center;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            line-height: 1.4;
+        }
+
+        .status-badge {
+            display: inline-block;
+            font-size: 0.75rem;
+            padding: 2px 8px;
+            border-radius: 10px;
+            margin-top: 6px;
+            font-weight: 600;
+        }
+        
+        .status-offline {
+            background-color: rgba(142, 142, 147, 0.15);
+            color: var(--text-muted);
+        }
+        
+        .status-online {
+            background-color: rgba(52, 199, 89, 0.15);
+            color: #34c759;
+        }
+
+        .timestamp {
+            font-size: 0.75rem;
+            margin-top: 4px;
+            color: var(--text-muted);
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1 id="title">Währungsrechner</h1>
+    
+    <div class="input-group">
+        <label id="label-from">Tschechische Krone</label>
+        <div class="input-wrapper">
+            <input type="number" id="input-from" placeholder="0" inputmode="decimal" autocomplete="off">
+            <span class="currency-badge" id="badge-from">CZK</span>
+        </div>
+    </div>
+
+    <div class="swap-container">
+        <button class="swap-btn" id="swap-btn" title="Währungen tauschen">
+            <svg viewBox="0 0 24 24">
+                <path d="M7 4v16M7 20l-4-4M7 20l4-4M17 20V4M17 4l-4 4M17 4l4 4"/>
+            </svg>
+        </button>
+    </div>
+
+    <div class="input-group">
+        <label id="label-to">Schweizer Franken</label>
+        <div class="input-wrapper">
+            <input type="number" id="input-to" placeholder="0" inputmode="decimal" autocomplete="off">
+            <span class="currency-badge" id="badge-to">CHF</span>
+        </div>
+    </div>
+
+    <div class="info-box" id="rate-info">
+        <div>Wechselkurs: 1 CZK = <span id="current-rate">...</span> CHF</div>
+        <div id="status" class="status-badge status-offline">Prüfe Kurs...</div>
+        <div id="time-info" class="timestamp"></div>
+    </div>
+</div>
+
+<script>
+    // Voreingestellter Offline-Fallback (Stand: Mitte 2026)
+    let exchangeRate = 0.038123; 
+    let isCzkToChf = true;
+
+    const inputFrom = document.getElementById('input-from');
+    const inputTo = document.getElementById('input-to');
+    const labelFrom = document.getElementById('label-from');
+    const labelTo = document.getElementById('label-to');
+    const badgeFrom = document.getElementById('badge-from');
+    const badgeTo = document.getElementById('badge-to');
+    const swapBtn = document.getElementById('swap-btn');
+    const currentRateDisplay = document.getElementById('current-rate');
+    const statusBadge = document.getElementById('status');
+    const timeInfo = document.getElementById('time-info');
+
+    function updateRateDisplay() {
+        if (isCzkToChf) {
+            currentRateDisplay.textContent = exchangeRate.toFixed(6);
+        } else {
+            currentRateDisplay.textContent = (1 / exchangeRate).toFixed(4);
+        }
+    }
+
+    function updateTimestamp() {
+        const now = new Date();
+        const timeStr = now.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        timeInfo.textContent = `Zuletzt geprüft: ${timeStr} (Auto-Update aktiv)`;
+    }
+
+    async function fetchLiveRate() {
+        try {
+            const controller = new AbortController();
+            const id = setTimeout(() => controller.abort(), 3000); // 3 Sekunden Timeout für schlechtes Netz
+            
+            const res = await fetch('https://open.er-api.com/v6/latest/CZK', { signal: controller.signal });
+            clearTimeout(id);
+            
+            if (res.ok) {
+                const data = await res.json();
+                if (data.rates && data.rates.CHF) {
+                    exchangeRate = data.rates.CHF;
+                    statusBadge.textContent = "Live-Kurs aktiv";
+                    statusBadge.className = "status-badge status-online";
+                    updateRateDisplay();
+                    convert('from');
+                }
+            }
+        } catch (e) {
+            console.log("Offline-Modus aktiv oder Timeout.");
+            statusBadge.textContent = "Offline-Modus";
+            statusBadge.className = "status-badge status-offline";
+        } finally {
+            updateTimestamp();
+        }
+    }
+
+    function convert(direction) {
+        const valFrom = parseFloat(inputFrom.value);
+        const valTo = parseFloat(inputTo.value);
+
+        if (direction === 'from') {
+            if (isNaN(valFrom)) { inputTo.value = ''; return; }
+            if (isCzkToChf) {
+                inputTo.value = (valFrom * exchangeRate).toFixed(2);
+            } else {
+                inputTo.value = (valFrom * (1 / exchangeRate)).toFixed(2);
+            }
+        } else {
+            if (isNaN(valTo)) { inputFrom.value = ''; return; }
+            if (isCzkToChf) {
+                inputFrom.value = (valTo / exchangeRate).toFixed(2);
+            } else {
+                inputFrom.value = (valTo / (1 / exchangeRate)).toFixed(2);
+            }
+        }
+    }
+
+    inputFrom.addEventListener('input', () => convert('from'));
+    inputTo.addEventListener('input', () => convert('to'));
+
+    swapBtn.addEventListener('click', () => {
+        isCzkToChf = !isCzkToChf;
+        
+        if (isCzkToChf) {
+            labelFrom.textContent = "Tschechische Krone";
+            badgeFrom.textContent = "CZK";
+            labelTo.textContent = "Schweizer Franken";
+            badgeTo.textContent = "CHF";
+        } else {
+            labelFrom.textContent = "Schweizer Franken";
+            badgeFrom.textContent = "CHF";
+            labelTo.textContent = "Tschechische Krone";
+            badgeTo.textContent = "CZK";
+        }
+
+        const temp = inputFrom.value;
+        inputFrom.value = inputTo.value;
+        inputTo.value = temp;
+
+        updateRateDisplay();
+    });
+
+    // App beim Starten initialisieren
+    updateRateDisplay();
+    fetchLiveRate();
+
+    // Alle 60 Sekunden (60000ms) im Hintergrund den Kurs aktualisieren
+    setInterval(fetchLiveRate, 60000);
+</script>
+
+</body>
+</html>
